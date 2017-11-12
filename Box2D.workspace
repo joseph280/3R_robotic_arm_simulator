@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="Workspace">
+		<Project filename="../../../../../Box2D/Box2D_v2.2.0/Contributions/Platforms/CodeBlocks/Engine.cbp" />
+		<Project filename="../../../../../Box2D/Box2D_v2.2.0/Contributions/Platforms/CodeBlocks/HelloWorld.cbp">
+			<Depends filename="../../../../../Box2D/Box2D_v2.2.0/Contributions/Platforms/CodeBlocks/Engine.cbp" />
+		</Project>
+		<Project filename="TestBed.cbp">
+			<Depends filename="../../../../../Box2D/Box2D_v2.2.0/Contributions/Platforms/CodeBlocks/Engine.cbp" />
+			<Depends filename="../../../../../Box2D/Box2D_v2.2.0/Contributions/Platforms/CodeBlocks/FreeGLUT.cbp" />
+			<Depends filename="../../../../../Box2D/Box2D_v2.2.0/Contributions/Platforms/CodeBlocks/GLUI.cbp" />
+		</Project>
+		<Project filename="../../../../../Box2D/Box2D_v2.2.0/Contributions/Platforms/CodeBlocks/FreeGLUT.cbp" />
+		<Project filename="../../../../../Box2D/Box2D_v2.2.0/Contributions/Platforms/CodeBlocks/GLUI.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>
