@@ -291,7 +291,7 @@ public:
 		pid3.setError(-(actualAnglejoint3-desiredAngle3));
                 pid3.step( 1 / settings->hz );
 		forceVal3 = pid3.getOutput();
-      		right_arm_lower->ApplyTorque(forceVal3*10000);
+      		right_arm_lower->ApplyTorque(forceVal3*5000);
                
 
 		float value =joint1->GetJointAngle() ;

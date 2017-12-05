@@ -46,7 +46,7 @@ bool torqueOn =false;
 
                                     bodyDef.type = b2_dynamicBody;
 
-
+/*
                   //----RIGHT ARM UPPER-----
                   bodyDef.position.Set(10,10);
                   polygonShape.SetAsBox(3,1);
@@ -66,7 +66,7 @@ bool torqueOn =false;
                   revoluteJointDef.upperAngle =  90 * DEGTORAD;
 
                   m_world->CreateJoint( &revoluteJointDef );
-
+*/
 
                   //----LEFT ARM UPPER-----
                   bodyDef.position.Set(-10,10);

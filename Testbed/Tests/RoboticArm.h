@@ -15,8 +15,6 @@
 
 #define DEGTORAD 0.0174532925199432957f
 #define RADTODEG 57.295779513082320876f
-
-
 #include "PIDController.h"
 
 
@@ -28,7 +26,7 @@
 
   {
 
-//---------------OBJ (braccio1.braccio2.braccio3.mano1dito1,mano2.dito2)
+//-----puntatori (braccio1.braccio2.braccio3.mano1dito1,mano2.dito2,mass,corpo-centrale)
 b2Body* mass;
 b2Body* body_center;
 b2Body* right_arm_upper;
@@ -46,9 +44,10 @@ b2RevoluteJoint* joint3;
 PIDController pid;
 PIDController pid2;
 PIDController pid3;
-//PIDController pid4;
-//PIDController pid5;
-//PIDController pid6;
+PIDController pid4;
+PIDController pid5;
+PIDController pid6;
+PIDController pid7;
 
 
 
@@ -56,7 +55,8 @@ PIDController pid3;
 float actualAnglejoint1;
 float actualAnglejoint2;
 float actualAnglejoint3;
-
+float actualAnglejoint4; //referred to finger1 left-right 
+float actualAnglejoint5; //referred to finger2 left-right
 //torque fornita ai motori
 float forceVal;
 float forceVal2;
@@ -65,27 +65,38 @@ float forceVal3;
 float desiredAngle;
 float desiredAngle2;
 float desiredAngle3;
+float desiredAngle4;//referred to finger1 left-right
+float desiredAngle5;//referred to finger2  left-righet
+
 // variabili per contatore
 float i;
 float c;
-bool torqueOn =false;
-bool addAngle =false;
-bool lessAngle =false;
-
+//booleane
+bool torqueOn;
+bool addAngle;
+bool lessAngle;
 
 public:
 
 
 
    roboticarm() {
-                  pid = PIDController();
-                  pid.setGains(0.6*7,1.2*7/5,5*7/8);
-                  pid2 = PIDController();
-                  pid2.setGains(0.6*7,1.2*7/3,3*7/8);
-                  pid3 = PIDController();
-                  pid3.setGains(0.6*7,1.2*8/3,3*7/8);
-                  
 
+
+                  torqueOn =true;
+                  addAngle =false;
+                  lessAngle =false;
+
+                  pid = PIDController();
+                  pid.setGains(0.6*6,2*6/6,6*6/8);
+                  pid2 = PIDController();
+                  pid2.setGains(0.6*6,2*6/3,6*3/8);
+                  pid3 = PIDController();
+                  pid3.setGains(0.6*7,2*7/3,7*3/8);
+                  pid4 = PIDController();
+                  pid4.setGains(0.6*7,1.2*8/2,2*7/8);
+                  pid5 = PIDController();
+                  pid5.setGains(0,0,0);
 /*
                   pid = PIDController();
                   pid.setGains(0.6*7,1.2*7/5,5*7/8);
@@ -110,9 +121,9 @@ public:
                   desiredAngle2 = 0*DEGTORAD;
                   desiredAngle3 = 0*DEGTORAD;
 
-//------------------------------COMMON DEFINITIONS
+//-----------------------COMMON DEFINITIONS
 
-//----------Variables
+                  //----------Variables
                   b2BodyDef bodyDef;
                   b2FixtureDef fixtureDef;
                   b2PolygonShape polygonShape;
@@ -121,7 +132,7 @@ public:
 
 
 
-//-------------Blocco Statico 
+                 //-------------Blocco Statico 
                   bodyDef.type = b2_staticBody;
                   fixtureDef.density = 1;
                   polygonShape.SetAsBox(3,3);
@@ -149,6 +160,7 @@ public:
 
                   right_arm_upper = m_world->CreateBody( &bodyDef );
                   right_arm_upper->CreateFixture( &fixtureDef );
+                  fixtureDef.density=1;
                   right_arm_upper->SetGravityScale(0);
 
                   revoluteJointDef.localAnchorA.Set(4,0);
@@ -173,6 +185,7 @@ public:
 
                   right_arm_middle = m_world->CreateBody( &bodyDef );
                   right_arm_middle->CreateFixture( &fixtureDef );
+                  fixtureDef.density=1;
                  right_arm_middle->SetGravityScale(0);
 
                   revoluteJointDef.localAnchorA.Set(4,0);
@@ -195,7 +208,7 @@ public:
                   right_arm_lower = m_world->CreateBody( &bodyDef );
                   right_arm_lower->CreateFixture( &fixtureDef );
                   right_arm_lower->SetGravityScale(0);
- 
+                                    fixtureDef.density=1;
                   revoluteJointDef.localAnchorA.Set(4,0);
                   revoluteJointDef.localAnchorB.Set(-4,0);
                   revoluteJointDef.bodyA = right_arm_middle;
@@ -209,61 +222,54 @@ public:
                   joint3 = (b2RevoluteJoint*) m_world->CreateJoint( &revoluteJointDef );
 
 
-                  //Mano da rifare
+             
 
 
-                  //----RIGHT HAND LEFT-----
+                  //----HAND LEFT-----
                   bodyDef.position.Set(28,30);
+                  
                   polygonShape.SetAsBox(2,0.5, b2Vec2(0,0), 0 );
                   right_hand_left = m_world->CreateBody( &bodyDef );
                   right_hand_left->CreateFixture( &fixtureDef );
-                 
-                  //right_hand_left->CreateFixture( &fixtureDef );
-                   right_hand_left->SetGravityScale(0);
+                  right_hand_left->SetGravityScale(0);
 
-                  //----RIGHT HAND JOINT LEFT-----
+                  //----HAND JOINT LEFT-----
                   revoluteJointDef.localAnchorA.Set(4,0);
                   revoluteJointDef.localAnchorB.Set(-2.8,0);
                   revoluteJointDef.bodyA = right_arm_lower;
                   revoluteJointDef.bodyB = right_hand_left;
-
                   revoluteJointDef.collideConnected = true;
                   revoluteJointDef.enableLimit = true;
-                  revoluteJointDef.lowerAngle = -45 * DEGTORAD;
-                  revoluteJointDef.upperAngle =  0 * DEGTORAD;
-
+                  revoluteJointDef.lowerAngle = -90 * DEGTORAD;
+                  revoluteJointDef.upperAngle =  -45 * DEGTORAD;
                   m_world->CreateJoint( &revoluteJointDef );
 
- //----FINGER-----
+                  //----FINGER-left-----
                   bodyDef.position.Set(34,30);
-                  polygonShape.SetAsBox(2, 0.5, b2Vec2(0,0), 0*DEGTORAD );
+                  polygonShape.SetAsBox(2, 0.5 );
                   right_finger_left = m_world->CreateBody( &bodyDef );
                   right_finger_left->CreateFixture( &fixtureDef );
                   right_finger_left->SetGravityScale(0);
-                  revoluteJointDef.localAnchorA.Set(4,0);
-                  revoluteJointDef.localAnchorB.Set(-2.8,0);
+                  revoluteJointDef.localAnchorA.Set(2.5,0);
+                  revoluteJointDef.localAnchorB.Set(-2.5,0);
                   revoluteJointDef.bodyA = right_hand_left;
                   revoluteJointDef.bodyB = right_finger_left;
 
                   revoluteJointDef.lowerAngle =  0 * DEGTORAD;
-                  revoluteJointDef.upperAngle =  45 * DEGTORAD;
+                  revoluteJointDef.upperAngle =   80* DEGTORAD;
         
                    m_world->CreateJoint( &revoluteJointDef );
 
-                  //----RIGHT HAND RIGHT-----
+                  //----HAND RIGHT-----
                   bodyDef.position.Set(28,30);
                   polygonShape.SetAsBox(2,0.5, b2Vec2(+0,0), 0);
                   right_hand_right = m_world->CreateBody( &bodyDef );
                   right_hand_right->CreateFixture( &fixtureDef );
-              //      polygonShape.SetAsBox(2, 0.5, b2Vec2(-2,3), -90*DEGTORAD );
-              //    right_hand_right->CreateFixture( &fixtureDef );
-               right_hand_right->SetGravityScale(0);
+                  right_hand_right->SetGravityScale(0);
+                  m_world->CreateJoint( &revoluteJointDef );
 
 
-               m_world->CreateJoint( &revoluteJointDef );
-
-
-//-----------------------------RIGHT HAND JOINT RIGHT--------------
+                  // ----------HAND JOINT RIGHT--------------
                   revoluteJointDef.localAnchorA.Set(4,0);
                   revoluteJointDef.localAnchorB.Set(-2.8,0);
                   revoluteJointDef.bodyA = right_arm_lower;
@@ -271,29 +277,29 @@ public:
 
                   revoluteJointDef.collideConnected = true;
                   revoluteJointDef.enableLimit = true;
-                  revoluteJointDef.lowerAngle = 0 * DEGTORAD;
-                  revoluteJointDef.upperAngle =  45 * DEGTORAD;
+                  revoluteJointDef.lowerAngle = 45 * DEGTORAD;
+                  revoluteJointDef.upperAngle = 90 * DEGTORAD;
 
                   m_world->CreateJoint( &revoluteJointDef );
 
-//----------------------------FINGER Right-------------------------
+                  //-----FINGER Right------------------
                   bodyDef.position.Set(34,30);
-                  polygonShape.SetAsBox(2, 0.5, b2Vec2(0,0), 0*DEGTORAD );
+                  polygonShape.SetAsBox(2, 0.5);
                   right_finger_right = m_world->CreateBody( &bodyDef );
                   right_finger_right->CreateFixture( &fixtureDef );
                   right_finger_right->SetGravityScale(0);
-                  revoluteJointDef.localAnchorA.Set(4,0);
-                  revoluteJointDef.localAnchorB.Set(-2.8,0);
+                  revoluteJointDef.localAnchorA.Set(2.5,0);
+                  revoluteJointDef.localAnchorB.Set(-2.5,0);
                   revoluteJointDef.bodyA = right_hand_right;
                   revoluteJointDef.bodyB = right_finger_right;
 
-                  revoluteJointDef.lowerAngle =  -45 * DEGTORAD;
+                  revoluteJointDef.lowerAngle =  -80 * DEGTORAD;
                   revoluteJointDef.upperAngle =  0 * DEGTORAD;
 
                   m_world->CreateJoint( &revoluteJointDef );
 
 
- //-----------------------------------MASSA------------------------
+                 //---------MASSA------------------------
 
                   bodyDef.position.Set(0,30);
                   bodyDef.type = b2_dynamicBody;
